@@ -1,10 +1,23 @@
-﻿using LearningSemanticKernel.Models;
+﻿using Anthropic.SDK.Messaging;
+using LearningSemanticKernel.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace LearningSemanticKernel.Hubs;
 
 public class ChatHub : Hub
 {
+    private readonly Kernel _kernel;
+    private readonly IChatCompletionService _chatCompletionService;
+
+    public ChatHub(Kernel kernel,
+        IChatCompletionService chatCompletionService)
+    {
+        _kernel = kernel;
+        _chatCompletionService = chatCompletionService;
+    }
+
     public async Task SendMessage(ChatMessageModel message)
     {
         message.ConnectionId = Context.ConnectionId;
@@ -16,5 +29,34 @@ public class ChatHub : Hub
     {
         await Clients.Client(message.ConnectionId)
             .SendAsync("ReceiveMessage", message.User, message.Message);
+
+        try
+        {
+            var res = _chatCompletionService.GetStreamingChatMessageContentsAsync(message.Message);
+
+            await StreamAsync(message.ConnectionId, res);
+        }
+        catch (Exception ex)
+        {
+            await Clients.Client(message.ConnectionId)
+                .SendAsync("ReceiveMessage", "Error", ex.Message);
+        }
+    }
+
+    private async Task StreamAsync(string connectionId, IAsyncEnumerable<StreamingChatMessageContent> res)
+    {
+        var first = true;
+        await foreach (var content in res.ConfigureAwait(false))
+        {
+            if (content.Role.HasValue && first)
+            {
+                await Clients.Client(connectionId)
+                    .SendAsync("ReceiveMessage", content.Role.ToString(), content.Content);
+                first = false;
+            }
+
+            await Clients.Client(connectionId)
+                .SendAsync("ReceiveMessage", "", content.Content);
+        }
     }
 }
