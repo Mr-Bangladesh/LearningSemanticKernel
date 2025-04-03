@@ -1,5 +1,4 @@
-﻿using Anthropic.SDK.Messaging;
-using LearningSemanticKernel.Models;
+﻿using LearningSemanticKernel.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
