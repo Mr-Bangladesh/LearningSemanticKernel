@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel;
+﻿using LearningSemanticKernel.Services;
+using Microsoft.SemanticKernel;
 
 #pragma warning disable SKEXP0070
 
@@ -12,7 +13,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterServices(this IServiceCollection services)
     {
-        return services;
+        return services
+            .AddScoped<IWeatherReportService, WeatherReportService>();
     }
 
     public static IServiceCollection AddAIComponents(this IServiceCollection services, ConfigurationManager config)
