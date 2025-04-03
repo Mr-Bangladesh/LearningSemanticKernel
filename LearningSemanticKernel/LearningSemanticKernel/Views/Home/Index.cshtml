@@ -2,7 +2,38 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container" style="font-size: 16px;">
+    <h4>Chat Room</h4>
+    <div id="chatWindow" class="bprder p-3" style="height:315px; overflow-y:scroll;"></div>
+    <input type="text" id="userInput" placeholder="Your Name" value="Faizul" class="form-control mb-2" />
+    <textarea id="messageInput" placeholder="Type your message" class="form-control mb-2" rows="3"></textarea>
+    <button class="btn btn-primary" id="sendButton">Ask</button>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+    connection.on("ReceiveMessage", (user, message) => {
+		let chatWindow = document.getElementById("chatWindow");
+        if(user === "") {
+            chatWindow.innerHTML += message;
+        }
+        else {
+			chatWindow.innerHTML += `<strong>${user}:</strong> ${message}<br />`;
+        }
+
+		chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
+
+	connection.start().catch(err => console.error(err.toString()));
+
+	document.getElementById("sendButton").addEventListener("click", function (event) {
+		const user = document.getElementById("userInput").value;
+		const message = document.getElementById("messageInput").value;
+		let chatMessage = {user, message};
+
+		connection.invoke("SendMessage", chatMessage).catch(err => console.error(err.toString()));
+		document.getElementById("messageInput").value = "";
+	});
+</script>
