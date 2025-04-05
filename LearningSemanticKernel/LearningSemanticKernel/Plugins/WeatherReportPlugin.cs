@@ -2,6 +2,7 @@
 using LearningSemanticKernel.Services;
 using Microsoft.SemanticKernel;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LearningSemanticKernel.Plugins;
 
@@ -22,7 +23,15 @@ public class WeatherReportPlugin
         try
         {
             var weatherReport = await _weatherReportService.GetWeatherReportAsync(city);
-            return JsonConvert.SerializeObject(weatherReport);
+
+            var weather = new JObject()
+            {
+                { "weather", JArray.FromObject(weatherReport.Weather) },
+                { "wind", JObject.FromObject(weatherReport.Wind) },
+                { "info", JObject.FromObject(weatherReport.Main) },
+            };
+
+            return weather.ToString();
         }
         catch (Exception ex)
         {

@@ -1,30 +1,39 @@
 ﻿using LearningSemanticKernel.Models;
-using Newtonsoft.Json;
 
 namespace LearningSemanticKernel.Services;
 
 public class WeatherReportService : IWeatherReportService
 {
-    private readonly string openWeatherMapUrl = "https://api.openweathermap.org/data/2.5/weather";
-    private readonly HttpClient _httpClient;
+    private readonly OpenWeatherHttpClient _openWeatherHttpClient;
 
-    public WeatherReportService(
-        IConfiguration config)
+    public WeatherReportService(OpenWeatherHttpClient openWeatherHttpClient)
     {
-        openWeatherMapUrl += $"?appid={config["OpenWeatherMap:ApiKey"]}";
-        _httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri(openWeatherMapUrl)
-        };
+        _openWeatherHttpClient = openWeatherHttpClient;
     }
 
     public async Task<WeatherReport> GetWeatherReportAsync(string city = "")
     {
-        var res = await _httpClient.GetAsync($"&q={city}");
-        res.EnsureSuccessStatusCode();
+        if(string.IsNullOrWhiteSpace(city))
+        {
+            throw new ArgumentException("City name cannot be null or empty.", nameof(city));
+        }
 
-        var content = await res.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject<WeatherReport>(content)
-            ?? throw new Exception("Cannot be deserialized.");
+        var request = new BaseHttpRequest()
+        {
+            Path = $"city/{city}/EN",
+            Method = HttpMethod.Get,
+        };
+
+        var query = new Dictionary<string, string>();
+        try
+        {
+            var res = await _openWeatherHttpClient.RequestAsync<BaseHttpRequest, WeatherReport>(request, query);
+
+            return res;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
 }
