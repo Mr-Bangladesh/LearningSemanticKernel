@@ -16,6 +16,20 @@ public class ChatHub : Hub
     private readonly IChatCompletionService _chatCompletionService;
     private readonly IWeatherReportService _weatherReportService;
 
+    private const string OllamaSystemMessage = @"""
+        You are a helpful weather assistant named ClimaBot. Your primary role is to provide accurate weather information and forecasts when explicitly requested by users. Strictly follow these rules:
+
+        1. ONLY call the weather API function if:
+           - User explicitly requests weather information
+           - A location is provided
+        2. NEVER call for:
+           - General/unrelated chats
+           - Hypotheticals
+           - Vague queries without location
+
+        For non-weather queries, respond conversationally without function calls.
+        """;
+
     public ChatHub(Kernel kernel,
         IChatCompletionService chatCompletionService,
         IWeatherReportService weatherReportService)
@@ -45,6 +59,7 @@ public class ChatHub : Hub
         };
 
         var history = new ChatHistory();
+        history.AddSystemMessage(OllamaSystemMessage);
         history.AddUserMessage(message.Message);
 
         try
