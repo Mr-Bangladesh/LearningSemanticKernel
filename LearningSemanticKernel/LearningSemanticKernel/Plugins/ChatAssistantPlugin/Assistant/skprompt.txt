@@ -1,0 +1,16 @@
+﻿Generate your response by following the steps below:
+1. Recursively break-down the post into smaller questions/directives
+2. For each atomic question/directive select the most relevant information form the context
+3. Generate a draft response using the selected information
+4. Remove duplicate content from the draft response
+5. Generate your final response after adjusting it to increase accuracy and relevance
+6. Now only show your final response! Do not provide any explanations or details
+7. If you do not know the answer, just say that you do not know
+
+Context:
+{{$context}}
+
+Question:
+{{$query}}
+
+Answer:

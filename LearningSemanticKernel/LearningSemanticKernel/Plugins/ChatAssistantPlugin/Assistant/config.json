@@ -1,0 +1,21 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Ecommerce store assistant",
+    "completion": {
+        "max_tokens": 4000,
+        "temperature": 0.1
+    },
+    "input": {
+        "parameters": [
+            {
+                "name": "context",
+                "description": "The context."
+            },
+            {
+                "name": "query",
+                "description": "The user query."
+            }
+        ]
+    }
+}
