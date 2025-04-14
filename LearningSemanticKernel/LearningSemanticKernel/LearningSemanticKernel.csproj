@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.44.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Amazon" Version="1.46.0-alpha" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
